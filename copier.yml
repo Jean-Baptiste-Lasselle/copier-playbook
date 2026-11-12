@@ -47,6 +47,7 @@ remote_user:
 
 ssh_password:
   type: str
+  default: ""
   secret: true
   help: SSH password for {{ remote_user }} (stored in dev group_vars; encrypt with ansible-vault before pushing)
   validator: "{% if not ssh_password %}SSH password cannot be empty{% endif %}"

@@ -2,23 +2,21 @@
 - name: Verify rootless Podman and SSH password authentication
   hosts: linux_servers
   gather_facts: false
-  become: true
   vars:
-    # Use ansible_user (the SSH login user) with a fallback if overridden
-    test_user: "{{ target_user | default(ansible_user) }}"
-
+    test_user: {{ remote_user }}
+{% raw %}
   tasks:
     - name: Check Podman binary is installed and executable
       ansible.builtin.command: podman --version
       changed_when: false
 
+    - name: Get UID of rootless user
+      ansible.builtin.command: "id -u {{ test_user }}"
+      register: test_user_uid
+      changed_when: false
+
     - name: Verify subordinate UID mapping exists for rootless user
-      ansible.builtin.command:
-        argv:
-          - grep
-          - -E
-          - "^{{ test_user }}:"
-          - /etc/subuid
+      ansible.builtin.command: "grep -E '^{{ test_user }}:' /etc/subuid"
       changed_when: false
 
     - name: Verify systemd lingering is enabled for rootless user
@@ -27,22 +25,8 @@
       register: linger_file
       failed_when: not linger_file.stat.exists
 
-    - name: Get UID for target user
-      ansible.builtin.command:
-        argv:
-          - id
-          - -u
-          - "{{ test_user }}"
-      register: test_user_uid
-      changed_when: false
-
     - name: Run rootless Podman info as target user
-      ansible.builtin.command:
-        argv:
-          - podman
-          - info
-          - --format
-          - "{{ '{{.Host.Security.Rootless}}' }}"
+      ansible.builtin.command: podman info --format '{{.Host.Security.Rootless}}'
       become: true
       become_user: "{{ test_user }}"
       environment:
@@ -52,11 +36,6 @@
       failed_when: rootless_check.stdout != "true"
 
     - name: Verify SSH password authentication is explicitly enabled
-      ansible.builtin.command:
-        argv:
-          - grep
-          - -E
-          - "^PasswordAuthentication yes$"
-          - /etc/ssh/sshd_config.d/99-ansible-password-auth.conf
+      ansible.builtin.command: grep -E "^PasswordAuthentication yes$" /etc/ssh/sshd_config.d/99-ansible-password-auth.conf
       changed_when: false
-
+{% endraw %}

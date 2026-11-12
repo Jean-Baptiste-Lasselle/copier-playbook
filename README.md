@@ -180,3 +180,30 @@ Whenever you update this template and push a new Git tag (e.g., `v0.2.0`), updat
 cd my-linux-infra
 copier update --trust
 ```
+
+
+## Contribute
+
+### Quick test running it
+
+* Windows (git bash for):
+
+```bash
+# see below note
+export DISTUTILS_USE_SDK=1
+# echo 'export DISTUTILS_USE_SDK=1' >> ~/.bashrc
+
+# 'winpty' is requried so interactive 
+# questions / answers work with copier
+
+rm -rf /tmp/test-infra-3nodes && \
+uvx copier copy --trust --defaults \
+  -d project_name="test-infra-3nodes" \
+  -d linux_distro="debian13" \
+  -d server_count=3 \
+  -d server_ips="192.168.10.11, 192.168.10.12, 192.168.10.13" \
+  -d remote_user="pesto" \
+  -d ssh_password="secretdevpassword" \
+  . /tmp/test-infra-3nodes
+
+```
