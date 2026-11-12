@@ -207,3 +207,5 @@ uvx copier copy --trust --defaults \
   . /tmp/test-infra-3nodes
 
 ```
+
+>_`DISTUTILS_USE_SDK=1` tells Python's build tools (setuptools) to trust the compiler already loaded in your terminal instead of hunting through the Windows Registry for older Visual Studio versions._
