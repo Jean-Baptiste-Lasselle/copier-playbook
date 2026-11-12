@@ -133,6 +133,7 @@ ansible-galaxy collection install -r requirements.yml
 | `project_name` | *(required)* | Name of the new Ansible repository (e.g., `infra-dev`). |
 | `description` | `Ansible playbooks for dev...` | Short description placed in the generated `README.md`. |
 | `linux_distro` | `debian13` | Target OS (`debian13`, `debian12`, `ubuntu2404`, or `rocky9`). |
+| `controller_os_family` | `debian` | Package-manager family for the Ansible controller (`debian` for Debian/Ubuntu/WSL2, or `redhat` for RHEL/Rocky/Fedora). |
 | `server_count` | `1` | Number of identical GNU/Linux servers (`N`) in the `dev` inventory. |
 | `server_ips` | `192.168.10.11` | Comma-separated list of `N` static IP addresses. |
 | `remote_user` | `ansible` | SSH username and rootless Podman user on target servers. |

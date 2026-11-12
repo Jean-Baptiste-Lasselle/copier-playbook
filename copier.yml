@@ -22,6 +22,14 @@ linux_distro:
     Rocky Linux 9: rocky9
   help: Target GNU/Linux distribution for all dev servers
 
+controller_os_family:
+  type: str
+  default: debian
+  choices:
+    Debian / Ubuntu (including WSL2): debian
+    RHEL / Rocky / Fedora: redhat
+  help: Package-manager family for the machine that runs Ansible
+
 server_count:
   type: int
   default: 1

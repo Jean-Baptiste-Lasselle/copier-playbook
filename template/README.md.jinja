@@ -22,24 +22,32 @@
 
 ---
 
-## 📋 Control Node Prerequisites
+## 📋 Ansible Controller Node Prerequisites
 
-Because this inventory uses **SSH username and password authentication**, ensure `sshpass` is installed on your Ansible control machine (Linux or WSL2):
+Run Ansible from a **controller machine**; it does not need to be one of the managed servers. If your workstation runs Windows, use a Linux environment such as WSL2 (Ansible does not run natively on Windows).
 
+Install the controller's system prerequisites. The package-manager choice below is based on your `controller_os_family` answer:
+
+{% if controller_os_family == 'debian' -%}
 ```bash
-# Debian / Ubuntu / WSL2
-sudo apt update && sudo apt install -y sshpass
-
-# RHEL / Rocky / Fedora
-sudo dnf install -y sshpass
+sudo apt-get update
+sudo apt-get install -y git sshpass python3-venv
 ```
+{% else -%}
+```bash
+sudo dnf install -y git sshpass python3 python3-pip
+```
+{% endif %}
 
-Install Python dependencies and Ansible Galaxy collections:
+> `sshpass` is required because this inventory uses SSH password authentication. On Rocky Linux, enable a repository that provides `sshpass` if it is not available in your configured repositories.
+
+Create an isolated Python environment, install the Ansible and Molecule tooling, and install the required Galaxy collections:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install ansible-core ansible-lint molecule molecule-plugins[{{ container_driver }}]
+python -m pip install --upgrade pip
+python -m pip install ansible-core ansible-lint molecule 'molecule-plugins[{{ container_driver }}]'
 ansible-galaxy collection install -r requirements.yml
 ```
 
