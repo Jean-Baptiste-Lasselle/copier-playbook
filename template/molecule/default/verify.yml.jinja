@@ -1,16 +1,24 @@
 ---
-- name: Verify rootless Podman and SSH configuration
+- name: Verify rootless Podman and SSH password authentication
   hosts: linux_servers
   gather_facts: false
+  become: true
   vars:
-    test_user: {{ remote_user }}
+    # Use ansible_user (the SSH login user) with a fallback if overridden
+    test_user: "{{ target_user | default(ansible_user) }}"
+
   tasks:
     - name: Check Podman binary is installed and executable
       ansible.builtin.command: podman --version
       changed_when: false
 
     - name: Verify subordinate UID mapping exists for rootless user
-      ansible.builtin.command: "grep -E '^{{ test_user }}:' /etc/subuid"
+      ansible.builtin.command:
+        argv:
+          - grep
+          - -E
+          - "^{{ test_user }}:"
+          - /etc/subuid
       changed_when: false
 
     - name: Verify systemd lingering is enabled for rootless user
@@ -19,16 +27,36 @@
       register: linger_file
       failed_when: not linger_file.stat.exists
 
+    - name: Get UID for target user
+      ansible.builtin.command:
+        argv:
+          - id
+          - -u
+          - "{{ test_user }}"
+      register: test_user_uid
+      changed_when: false
+
     - name: Run rootless Podman info as target user
-      ansible.builtin.command: podman info --format '{{ "{{.Host.Security.Rootless}}" }}'
+      ansible.builtin.command:
+        argv:
+          - podman
+          - info
+          - --format
+          - "{{ '{{.Host.Security.Rootless}}' }}"
       become: true
       become_user: "{{ test_user }}"
       environment:
-        XDG_RUNTIME_DIR: "/run/user/1001"
+        XDG_RUNTIME_DIR: "/run/user/{{ test_user_uid.stdout }}"
       register: rootless_check
       changed_when: false
       failed_when: rootless_check.stdout != "true"
 
-    - name: Verify SSH password authentication remains enabled in dev
-      ansible.builtin.command: grep -E "^PasswordAuthentication yes$" /etc/ssh/sshd_config.d/99-ansible-auth.conf
+    - name: Verify SSH password authentication is explicitly enabled
+      ansible.builtin.command:
+        argv:
+          - grep
+          - -E
+          - "^PasswordAuthentication yes$"
+          - /etc/ssh/sshd_config.d/99-ansible-password-auth.conf
       changed_when: false
+

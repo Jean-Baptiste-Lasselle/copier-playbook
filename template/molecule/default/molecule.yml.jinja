@@ -1,4 +1,16 @@
 ---
+{% set distro_images = {
+  'debian13': 'geerlingguy/docker-debian13-ansible:latest',
+  'debian12': 'geerlingguy/docker-debian12-ansible:latest',
+  'ubuntu2404': 'geerlingguy/docker-ubuntu2404-ansible:latest',
+  'rocky9': 'geerlingguy/docker-rockylinux9-ansible:latest'
+} -%}
+{% set distro_commands = {
+  'debian13': '/lib/systemd/systemd',
+  'debian12': '/lib/systemd/systemd',
+  'ubuntu2404': '/lib/systemd/systemd',
+  'rocky9': '/usr/sbin/init'
+} -%}
 dependency:
   name: galaxy
   options:
@@ -8,47 +20,14 @@ driver:
   name: {{ container_driver }}
 
 platforms:
-  - name: instance-ubuntu2404
-    image: geerlingguy/docker-ubuntu2404-ansible:latest
+  - name: instance-{{ linux_distro }}
+    image: {{ distro_images[linux_distro] }}
     pre_build_image: true
     privileged: true
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
     cgroupns_mode: host
-    command: /lib/systemd/systemd
-    groups:
-      - linux_servers
-
-  - name: instance-debian12
-    image: geerlingguy/docker-debian12-ansible:latest
-    pre_build_image: true
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
-    cgroupns_mode: host
-    command: /lib/systemd/systemd
-    groups:
-      - linux_servers
-
-  - name: instance-debian13
-    image: geerlingguy/docker-debian13-ansible:latest
-    pre_build_image: true
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
-    cgroupns_mode: host
-    command: /lib/systemd/systemd
-    groups:
-      - linux_servers
-
-  - name: instance-rocky9
-    image: geerlingguy/docker-rockylinux9-ansible:latest
-    pre_build_image: true
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
-    cgroupns_mode: host
-    command: /usr/sbin/init
+    command: {{ distro_commands[linux_distro] }}
     groups:
       - linux_servers
 

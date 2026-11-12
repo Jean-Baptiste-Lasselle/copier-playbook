@@ -13,5 +13,5 @@
 - name: Configure rootless Podman environment
   ansible.builtin.include_tasks: rootless.yml
 
-- name: Configure SSH authentication policy
-  ansible.builtin.include_tasks: ssh.yml
+- name: Ensure SSH password authentication remains enabled
+  ansible.builtin.include_tasks: ssh_password.yml

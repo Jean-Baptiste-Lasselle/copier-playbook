@@ -8,4 +8,3 @@
         name: podman
       vars:
         podman_rootless_user: "{{ remote_user }}"
-        podman_harden_ssh: "{{ env_name != 'dev' }}"

@@ -1,6 +1,6 @@
 ---
 env_name: dev
-ssh_user: "{{ remote_user }}"
-ntp_servers:
-  - 0.pool.ntp.org
-  - 1.pool.ntp.org
+target_distro: {{ linux_distro }}
+ansible_user: {{ remote_user }}
+ansible_password: "{{ '{{' }} vault_ssh_password {{ '}}' }}"
+ansible_become_password: "{{ '{{' }} vault_ssh_password {{ '}}' }}"

@@ -1,13 +1,10 @@
 ---
+{% set ip_list = server_ips.split(',') | map('trim') | reject('equalto', '') | list -%}
 all:
   children:
     linux_servers:
-      children:
-        webservers:
-          hosts:
-            dev-web-01:
-              ansible_host: {{ dev_web_ip }}
-        dbservers:
-          hosts:
-            dev-db-01:
-              ansible_host: {{ dev_db_ip }}
+      hosts:
+{% for ip in ip_list %}
+        dev-node-{{ '%02d' % loop.index }}:
+          ansible_host: {{ ip }}
+{% endfor %}

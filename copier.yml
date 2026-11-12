@@ -4,28 +4,52 @@ _templates_suffix: .jinja
 
 project_name:
   type: str
-  help: Name of the Ansible playbook repository (e.g., infra-web-servers)
+  help: Name of the Ansible playbook repository (e.g., infra-dev)
   validator: "{% if not project_name %}Project name cannot be empty{% endif %}"
 
 description:
   type: str
-  default: Ansible playbooks for Linux server provisioning and configuration
+  default: Ansible playbooks for dev Linux servers with rootless Podman
   help: Short project description
+
+linux_distro:
+  type: str
+  default: debian13
+  choices:
+    Debian 13 (Trixie): debian13
+    Debian 12 (Bookworm): debian12
+    Ubuntu 24.04 LTS (Noble): ubuntu2404
+    Rocky Linux 9: rocky9
+  help: Target GNU/Linux distribution for all dev servers
+
+server_count:
+  type: int
+  default: 1
+  help: Number of identical Linux servers in the dev inventory (N)
+  validator: "{% if server_count < 1 %}Number of servers must be at least 1{% endif %}"
+
+server_ips:
+  type: str
+  default: "192.168.10.11"
+  help: >-
+    Comma-separated list of {{ server_count }} static IP address(es)
+    (e.g., {% for i in range(1, server_count + 1) %}192.168.10.{{ 10 + i }}{% if not loop.last %}, {% endif %}{% endfor %})
+  validator: >-
+    {% set ips = server_ips.split(',') | map('trim') | reject('equalto', '') | list %}
+    {% if ips | length != server_count %}
+    You specified server_count={{ server_count }}, so you must provide exactly {{ server_count }} comma-separated IP address(es) (got {{ ips | length }}).
+    {% endif %}
 
 remote_user:
   type: str
   default: ansible
-  help: Default SSH user on target Linux servers
+  help: SSH username on target Linux servers
 
-dev_web_ip:
+ssh_password:
   type: str
-  default: 192.168.10.11
-  help: Static IP address for the initial dev web server
-
-dev_db_ip:
-  type: str
-  default: 192.168.10.12
-  help: Static IP address for the initial dev database server
+  secret: true
+  help: SSH password for {{ remote_user }} (stored in dev group_vars; encrypt with ansible-vault before pushing)
+  validator: "{% if not ssh_password %}SSH password cannot be empty{% endif %}"
 
 container_driver:
   type: str
@@ -37,5 +61,17 @@ container_driver:
 
 _tasks:
   - command: git init
-    when: "{{ not _copier_conf.answers_file is exists }}"
-  - command: pre-commit install || true
+  - command:
+      - python
+      - -c
+      - |
+        import shutil, subprocess, sys
+        if not shutil.which("pre-commit"):
+            sys.exit(
+                "\n[ERROR] This Copier template requires 'pre-commit' to be installed.\n"
+                "Please install it using one of the following commands and try again:\n"
+                "  - Using uv:   uv tool install pre-commit\n"
+                "  - Using pipx: pipx install pre-commit\n"
+                "  - Using pip:  python -m pip install --user pre-commit\n"
+            )
+        subprocess.run(["pre-commit", "install"], check=True)

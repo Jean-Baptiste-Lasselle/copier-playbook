@@ -1,9 +1,8 @@
 ---
-- name: Configure Linux servers with rootless Podman
+- name: Configure dev Linux servers with rootless Podman
   hosts: linux_servers
   gather_facts: true
   roles:
     - role: podman
       vars:
         podman_rootless_user: "{{ remote_user }}"
-        podman_harden_ssh: "{{ env_name != 'dev' }}"

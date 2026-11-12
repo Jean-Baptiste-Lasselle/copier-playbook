@@ -19,7 +19,3 @@ argument_specs:
         type: bool
         default: true
         description: Enable the user-level podman.socket for Docker-API compatibility.
-      podman_harden_ssh:
-        type: bool
-        default: false
-        description: Disable SSH password authentication (recommended for staging/prod).

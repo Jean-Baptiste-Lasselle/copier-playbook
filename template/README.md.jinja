@@ -1,0 +1,74 @@
+# {{ project_name }}
+
+{{ description }}
+
+* **Environment:** `dev`
+* **Target Distribution:** `{{ linux_distro }}`
+* **SSH & Rootless Podman User:** `{{ remote_user }}`
+* **Managed Nodes:** `{{ server_count }}`
+
+---
+
+## 🖥️ Dev Inventory (`inventories/dev/hosts.yml`)
+
+{% set ip_list = server_ips.split(',') | map('trim') | reject('equalto', '') | list -%}
+
+| Hostname | Static IP Address | OS Target |
+| :--- | :--- | :--- |
+{% for ip in ip_list -%}
+
+| `dev-node-{{ '%02d' % loop.index }}` | `{{ ip }}` | `{{ linux_distro }}` |
+{% endfor %}
+
+---
+
+## 📋 Control Node Prerequisites
+
+Because this inventory uses **SSH username and password authentication**, ensure `sshpass` is installed on your Ansible control machine (Linux or WSL2):
+
+```bash
+# Debian / Ubuntu / WSL2
+sudo apt update && sudo apt install -y sshpass
+
+# RHEL / Rocky / Fedora
+sudo dnf install -y sshpass
+```
+
+Install Python dependencies and Ansible Galaxy collections:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install ansible-core ansible-lint molecule molecule-plugins[{{ container_driver }}]
+ansible-galaxy collection install -r requirements.yml
+```
+
+---
+
+## 🔐 Encrypting Your SSH Password (`ansible-vault`)
+
+Your initial SSH password was saved in `inventories/dev/group_vars/all/vault.yml`. Encrypt it before committing to Git:
+
+```bash
+ansible-vault encrypt inventories/dev/group_vars/all/vault.yml
+```
+
+---
+
+## 🚀 Running Playbooks
+
+### Check Connectivity (`ping`)
+```bash
+ansible all -m ansible.builtin.ping --ask-vault-pass
+```
+
+### Apply Rootless Podman Configuration
+```bash
+ansible-playbook playbooks/site.yml --ask-vault-pass
+```
+*(If `vault.yml` is not yet encrypted, omit `--ask-vault-pass`.)*
+
+### Run Molecule Verification (`{{ linux_distro }}`)
+```bash
+molecule test
+```
