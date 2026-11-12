@@ -1,0 +1,4 @@
+---
+# Encrypt this file before committing secrets:
+# ansible-vault encrypt inventories/dev/group_vars/all/vault.yml
+vault_example_secret: "change-me-in-vault"

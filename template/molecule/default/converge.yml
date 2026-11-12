@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: linux_servers
+  gather_facts: true
+  tasks:
+    - name: Apply rootless Podman role
+      ansible.builtin.include_role:
+        name: podman
+      vars:
+        podman_rootless_user: "{{ remote_user }}"
+        podman_harden_ssh: "{{ env_name != 'dev' }}"

@@ -1,0 +1,49 @@
+---
+- name: Ensure rootless Podman user exists
+  ansible.builtin.user:
+    name: "{{ podman_rootless_user }}"
+    shell: /bin/bash
+    create_home: true
+    state: present
+  register: podman_user_info
+
+- name: Configure /etc/subuid for rootless user
+  ansible.builtin.lineinfile:
+    path: /etc/subuid
+    regexp: "^{{ podman_rootless_user }}:"
+    line: "{{ podman_rootless_user }}:{{ podman_subuid_start }}:{{ podman_subuid_count }}"
+    create: true
+    mode: "0644"
+
+- name: Configure /etc/subgid for rootless user
+  ansible.builtin.lineinfile:
+    path: /etc/subgid
+    regexp: "^{{ podman_rootless_user }}:"
+    line: "{{ podman_rootless_user }}:{{ podman_subuid_start }}:{{ podman_subuid_count }}"
+    create: true
+    mode: "0644"
+
+- name: Allow rootless containers to bind privileged ports (>= 80)
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "{{ podman_unprivileged_port_start | string }}"
+    sysctl_file: /etc/sysctl.d/99-podman-rootless.conf
+    reload: true
+  notify: Reload sysctl
+
+- name: Enable systemd lingering for rootless user
+  ansible.builtin.command:
+    cmd: "loginctl enable-linger {{ podman_rootless_user }}"
+    creates: "/var/lib/systemd/linger/{{ podman_rootless_user }}"
+
+- name: Enable rootless podman.socket for user
+  ansible.builtin.systemd_service:
+    name: podman.socket
+    scope: user
+    enabled: true
+    state: started
+  become: true
+  become_user: "{{ podman_rootless_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ podman_user_info.uid }}"
+  when: podman_enable_socket | bool

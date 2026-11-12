@@ -1,0 +1,5 @@
+---
+- name: Ensure Podman and rootless dependencies are installed (RedHat)
+  ansible.builtin.dnf:
+    name: "{{ podman_packages }}"
+    state: present

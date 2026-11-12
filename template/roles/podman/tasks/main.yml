@@ -1,0 +1,17 @@
+---
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_facts['os_family'] }}.yml"
+
+- name: Install Podman on RedHat family
+  ansible.builtin.include_tasks: install_redhat.yml
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Install Podman on Debian family
+  ansible.builtin.include_tasks: install_debian.yml
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Configure rootless Podman environment
+  ansible.builtin.include_tasks: rootless.yml
+
+- name: Configure SSH authentication policy
+  ansible.builtin.include_tasks: ssh.yml

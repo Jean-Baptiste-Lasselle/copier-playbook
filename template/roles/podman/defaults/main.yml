@@ -1,0 +1,7 @@
+---
+podman_rootless_user: "{{ ansible_user | default('ansible') }}"
+podman_subuid_start: 100000
+podman_subuid_count: 65536
+podman_enable_socket: true
+podman_unprivileged_port_start: 80
+podman_harden_ssh: false

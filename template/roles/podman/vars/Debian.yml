@@ -1,0 +1,8 @@
+---
+podman_packages:
+  - podman
+  - podman-compose
+  - slirp4netns
+  - fuse-overlayfs
+  - uidmap
+  - dbus-user-session

@@ -1,0 +1,25 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure rootless Podman
+    options:
+      podman_rootless_user:
+        type: str
+        required: true
+        description: Linux user configured to run rootless Podman containers.
+      podman_subuid_start:
+        type: int
+        default: 100000
+        description: Starting subordinate UID for user namespaces.
+      podman_subuid_count:
+        type: int
+        default: 65536
+        description: Number of subordinate UIDs allocated.
+      podman_enable_socket:
+        type: bool
+        default: true
+        description: Enable the user-level podman.socket for Docker-API compatibility.
+      podman_harden_ssh:
+        type: bool
+        default: false
+        description: Disable SSH password authentication (recommended for staging/prod).

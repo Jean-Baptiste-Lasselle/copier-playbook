@@ -1,0 +1,11 @@
+---
+profile: production
+
+exclude_paths:
+  - .cache/
+  - .ansible_cache/
+  - .git/
+  - molecule/
+
+warn_list:
+  - experimental

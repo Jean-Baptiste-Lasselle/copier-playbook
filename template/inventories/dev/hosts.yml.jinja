@@ -1,0 +1,13 @@
+---
+all:
+  children:
+    linux_servers:
+      children:
+        webservers:
+          hosts:
+            dev-web-01:
+              ansible_host: {{ dev_web_ip }}
+        dbservers:
+          hosts:
+            dev-db-01:
+              ansible_host: {{ dev_db_ip }}
