@@ -61,6 +61,16 @@ Your initial SSH password was saved in `inventories/dev/group_vars/all/vault.yml
 ansible-vault encrypt inventories/dev/group_vars/all/vault.yml
 ```
 
+To change it you can also do this:
+
+```bash
+cat << 'EOF' > inventories/dev/group_vars/all/vault.yml
+---
+vault_ssh_password: "pesto"
+EOF
+ansible-vault encrypt inventories/dev/group_vars/all/vault.yml
+```
+
 ---
 
 ## 🚀 Running Playbooks

@@ -26,10 +26,13 @@ platforms:
     privileged: true
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
-    cgroupns_mode: host
     command: {{ distro_commands[linux_distro] }}
     groups:
       - linux_servers
+    # cgroupns_mode: host
+    # Remove cgroupns_mode: host from here
+    # (Note: On modern Podman + cgroup v2 on Debian 13, --cgroupns=host is often unnecessary or breaks systemd inside rootless Podman—Podman defaults to --cgroupns=private which works cleanly with systemd containers).
+    
 
 provisioner:
   name: ansible
